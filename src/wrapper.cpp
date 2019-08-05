@@ -69,6 +69,18 @@ std::vector<FilterList>& FilterList::GetFilterLists(const std::string &category)
   return list;
 }
 
+HostnameResources::HostnameResources(const std::string& stylesheet,
+                                     const std::vector<std::string>& exceptions,
+                                     const std::vector<std::string>& script_injections)
+    : stylesheet(stylesheet),
+      exceptions(exceptions),
+      script_injections(script_injections) {}
+
+HostnameResources::HostnameResources(const HostnameResources& other) = default;
+
+HostnameResources::~HostnameResources() {
+}
+
 Engine::Engine() : raw(engine_create("")) {
 }
 
@@ -120,6 +132,27 @@ void Engine::addResource(const std::string& key,
 
 void Engine::addResources(const std::string& resources) {
   engine_add_resources(raw, resources.c_str());
+}
+
+const HostnameResources Engine::hostnameCosmeticResources(const std::string& hostname) {
+  C_HostnameResources resources = engine_hostname_cosmetic_resources(raw, hostname.c_str());
+  const std::string stylesheet = std::string(resources.stylesheet);
+
+  std::vector<std::string> exceptions;
+  for(size_t i = 0; i < resources.exceptions_len; i++) {
+    exceptions.push_back(std::string(resources.exceptions[i]));
+  }
+
+  std::vector<std::string> script_injections;
+  for(size_t i = 0; i < resources.script_injections_len; i++) {
+    script_injections.push_back(std::string(resources.script_injections[i]));
+  }
+
+  return HostnameResources(
+    stylesheet,
+    exceptions,
+    script_injections
+  );
 }
 
 const std::string Engine::classIdStylesheet(const std::vector<std::string>& classes, const std::vector<std::string>& ids, const std::vector<std::string>& exceptions) {
