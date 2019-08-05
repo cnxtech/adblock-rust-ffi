@@ -27,7 +27,7 @@ pub struct FList {
 pub unsafe extern "C" fn engine_create(rules: *const c_char) -> *mut Engine {
     let split = CStr::from_ptr(rules).to_str().unwrap().lines();
     let rules: Vec<String> = split.map(String::from).collect();
-    let engine = Engine::from_rules(rules.as_slice());
+    let engine = Engine::from_rules_parametrised(rules.as_slice(), true, true, false, true);
     Box::into_raw(Box::new(engine))
 }
 
